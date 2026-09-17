@@ -65,3 +65,57 @@ def buscar_patrimonio(patrimonio_id: int):
     )
 
 
+@app.post("/patrimonio", status_code=201)
+def cadastrar_patrimonio(patrimonio: Patrimonio):
+
+    novo_id = 1
+
+    if patrimonio:
+        novo_id = max(p["id"] for p in patrimonio) + 1
+
+    novo_patrimonio = {
+        "id": novo_id,
+        ** patrimonio.model_dump()
+    }
+
+    patrimonio.append(novo_patrimonio)
+
+    return {
+        "mensagem": "Patrimonio cadastrado com sucesso!",
+        "patrimonio": novo_patrimonio
+    }
+
+
+@app.put("/patrimonio/ {patrimonio_id}")
+def atulizar_patrimonio(
+    patrimonio_id: int,
+    dados: PatrimonioAtualizacao
+):
+
+    for patrimonio in patrimonio:
+
+        if patrimonio["id"] == patrimonio_id:
+
+            dados_atualizacao = dados.model_dump(
+                exclude_unset=True
+            )
+
+            patrimonio.update(dados_atualizacao)
+
+        return {
+            "mensagem": "Patrimonio atualizacao com sucesso!",
+            "patrimonio": patrimonio
+        }
+
+    raise HTTPException(
+        status_code=404,
+        detail="Patrimônio não encontrado"
+    )
+
+
+@app.get("/")
+def inico():
+    return {
+        "mensagem": "API de Patrimonio funcionado!"
+        "documento": "/docs"
+    }
